@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhavana S G Portfolio</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{ font-family:'Nunito',sans-serif; background:#eef2ff; color:#1e293b; }
+nav{ display:flex; justify-content:space-between; align-items:center; padding:20px 60px; background:#1e1b4b; position:sticky; top:0; z-index:1000; }
+.logo{ font-family:'Playfair Display',serif; font-size:28px; color:#c4b5fd; font-weight:700; }
+nav ul{ display:flex; list-style:none; gap:30px; }
+nav ul li a{ text-decoration:none; color:white; font-weight:600; }
+section{ padding:80px 20px; }
+.section-title{ text-align:center; font-size:36px; margin-bottom:40px; color:#312e81; }
+.card{ max-width:900px; margin:auto; background:white; padding:35px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
+form{ display:flex; flex-direction:column; gap:15px; }
+input,textarea{ padding:14px; border:1px solid #cbd5e1; border-radius:10px; }
+button.submit-btn{ background:#312e81; color:white; padding:14px; border:none; border-radius:10px; cursor:pointer; }
+.error{ color:red; font-size:14px; }
+.success{ background:rgba(34,197,94,0.2); padding:10px; border-radius:8px; text-align:center; margin-top:10px; color:green; }
+.message-item{ margin-top:15px; padding:10px; background:#f8fafc; border-radius:10px; }
+.counter{ margin-top:20px; font-weight:bold; text-align:center; font-size:18px; }
+.feedback{ text-align:center; margin-top:10px; font-weight:600; font-size:16px; }
+footer{ background:#1e1b4b; color:white; text-align:center; padding:20px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Bhavana S G</div>
+  <ul>
+    <li><a href="#home">Home</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<section id="home">
+  <div class="card" style="text-align:center; padding:50px;">
+    <h1>Bhavana S G</h1>
+    <p>Hi, I’m Bhavana S G — a passionate BCA student with strong interest in web development and programming.</p>
+  </div>
+</section>
+
+<section id="skills">
+  <h2 class="section-title">Skills</h2>
+  <div class="card" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:15px;">
+    <div class="message-item">HTML</div>
+    <div class="message-item">CSS</div>
+    <div class="message-item">JavaScript</div>
+    <div class="message-item">Python</div>
+    <div class="message-item">C</div>
+    <div class="message-item">C++</div>
+    <div class="message-item">DBMS</div>
+    <div class="message-item">GitHub</div>
+  </div>
+</section>
+
+<section id="about">
+  <h2 class="section-title">About Me</h2>
+  <div class="card">
+    <p>I am <strong>Bhavana S G</strong>, a BCA student interested in web development and software technologies.</p>
+    <p>I enjoy learning practical coding skills and building useful projects.</p>
+  </div>
+</section>
+
+<section id="contact">
+  <h2 class="section-title">Contact & Messages</h2>
+  <div class="card">
+    <!-- Only one form -->
+    <form id="contactForm">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" required></textarea>
+      <button class="submit-btn" type="submit">Send Message</button>
+    </form>
+
+    <div class="counter">Total messages saved: <span id="totalMessages">0</span></div>
+    <div class="feedback" id="feedback"></div>
+    <div id="messagesBox"></div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Bhavana S G Portfolio
+</footer>
+
+<script>
+const contactForm = document.getElementById('contactForm');
+const totalMessagesEl = document.getElementById('totalMessages');
+const feedbackEl = document.getElementById('feedback');
+const messagesBox = document.getElementById('messagesBox');
+
+contactForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(contactForm));
+  try {
+    const res = await fetch('/api/messages', {  // Use one endpoint
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if(result.success){
+      feedbackEl.textContent = 'Message saved successfully!';
+      feedbackEl.className = 'feedback success';
+      contactForm.reset();
+      loadMessages();
+    } else {
+      feedbackEl.textContent = 'Error: ' + result.error;
+      feedbackEl.className = 'feedback error';
+    }
+  } catch(err){
+    feedbackEl.textContent = 'Server not reachable';
+    feedbackEl.className = 'feedback error';
+  }
+});
+
+// Load messages and counter
+async function loadMessages(){
+  try{
+    const res = await fetch('/api/messages');  // Only one endpoint
+    const result = await res.json();
+    if(result.success){
+      messagesBox.innerHTML = '';
+      totalMessagesEl.textContent = result.data.length;
+      result.data.forEach(msg=>{
+        const div = document.createElement('div');
+        div.className = 'message-item';
+        div.innerHTML = `<strong>${msg.name}</strong> (${msg.email})<br>${msg.message}<br><small>${new Date(msg.date).toLocaleString()}</small>`;
+        messagesBox.appendChild(div);
+      });
+    }
+  }catch(err){ console.log(err); }
+}
+
+// Initial load
+loadMessages();
+</script>
+
+</body>
+</html>
